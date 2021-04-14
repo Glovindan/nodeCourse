@@ -1,0 +1,49 @@
+user:
+	id
+	name
+	login
+	password
+	token
+
+message:
+	id
+	isChannelMessage
+	senderid
+	receiverid (userid/channelid)
+	text
+	datetime
+	supermessageid
+/*
+thread:
+	id
+	channelid
+	messageid
+*/
+channel:
+	id
+	name
+
+user-channel:
+    userid
+    channelid
+
+	user -< message
+	supermessageid -< message
+	user -< user-channel >- channel
+
+actions for user:
+	register
+	login
+	create chat
+	open chat
+	delete chat
+	create thread
+	open thread
+	delete thread (admin)
+	create channel
+	delete channel (admin)
+	open channel
+	join channel
+	send message
+	delete message
+	edit message

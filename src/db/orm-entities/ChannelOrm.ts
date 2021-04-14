@@ -1,8 +1,7 @@
 class ChannelOrm {
-
     private _id: number;
-
     private _name: string;
+
 
     constructor(id: number, name: string) {
         this._id = id;

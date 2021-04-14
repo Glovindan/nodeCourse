@@ -5,11 +5,12 @@ import * as settings from './db-settings.json';
 import IDataBase from "./IDataBase";
 import UserOrm from "./orm-entities/UserOrm";
 
-class Db implements IDataBase {
+class DB implements IDataBase {
     private db: Database;
 
     constructor() {
         this.db = new sqlite3.Database(`${__dirname}/${settings.dbName}`);
+
     }
 
     getUserByLogin(login: string) {
@@ -17,20 +18,12 @@ class Db implements IDataBase {
             const query = "SELECT * FROM user WHERE login = '" + login + "'";
             this.db.get(query, (err, res) => {
                 if (!err) {
-                    const user = new UserOrm(
-                        res.id,
-                        res.name,
-                        res.nickname,
-                        res.login,
-                        res.password,
-                        res.token
-                    );
+                    const user = new UserOrm(res.id, res.name, res.login, res.password, res.token);
                     resolve(user);
                 }
-                resolve(null);
             });
         });
     }
 }
 
-export default Db;
+export default DB;
