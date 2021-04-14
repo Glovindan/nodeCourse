@@ -11,7 +11,6 @@ class DB implements IDataBase {
 
   constructor() {
     this.db = new sqlite3.Database(`${__dirname}/${settings.dbName}`);
-
   }
 
   getUserByLogin(login: string) {
@@ -31,7 +30,7 @@ class DB implements IDataBase {
       const query = `SELECT * FROM messages WHERE receiverId = ${userId}`;
       this.db.get(query, (err, res) => {
         if (!err) {
-          let messages: MessageOrm[];
+          let messages: MessageOrm[] = [];
           for(let message of res) {
             messages.push(message);
           }
@@ -41,32 +40,19 @@ class DB implements IDataBase {
     });
   }
 
-  register(name: string, login: string, password: string) {
-    return new Promise<boolean>(resolve => {
-      this.getUserByLogin(login).then(result => {
-        if (result) {
-          const query = `INSERT INTO users(name, login, password) VALUES(${name},${login},${password})`;
-          this.db.get(query, (err) => {
-            if (!err) {
-              resolve(true);
-            };
-            resolve(false);
-          });
-        };
-        resolve(false);
-      });
-    });
-  }
-
-  authorize(login: string, password: string) {
-    return new Promise<boolean>(resolve => {
-      const query = `SELECT * FROM users WHERE login = ${login} AND password = ${password}`;
-      this.db.get(query, (err) => {
-        if (!err) {
-          return true;
-        };
-        return false;
-      });
+  addUser(name: string, login: string, password: string) {
+    return new Promise<boolean>(async (resolve) => {
+      const existedUser = await this.getUserByLogin(login);
+      if (!existedUser) {
+        const query = `INSERT INTO users(name, login, password) VALUES(${name},${login},${password})`;
+        this.db.get(query, (err) => {
+          if (!err) {
+            resolve(true);
+          }
+          resolve(false);
+        });
+      }
+      resolve(false);
     });
   }
 
@@ -77,7 +63,7 @@ class DB implements IDataBase {
       this.db.get(query, (err) => {
         if (!err) {
           resolve(true);
-        };
+        }
         resolve(false);
       });
     });
@@ -89,7 +75,7 @@ class DB implements IDataBase {
       this.db.get(query, (err) => {
         if (!err) {
           resolve(true);
-        };
+        }
         resolve(false);
       });
     });
