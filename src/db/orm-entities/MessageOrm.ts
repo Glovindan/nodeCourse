@@ -1,83 +1,79 @@
 class MessageOrm {
-    private _id: number;
+  private _id: number;
+  private _senderid: number;
+  private _receiverid: number;
+  private _supermessageid: number;
+  private _text: string;
+  private _datetime: string;
+  private _isChannelMessage: number;
 
-    private _senderId: number;
 
-    private _recieverId: number;
+  constructor(id: number, senderid: number, receiverid: number, supermessageid: number, text: string, datetime: string, isChannelMessage: number) {
+    this._id = id;
+    this._senderid = senderid;
+    this._receiverid = receiverid;
+    this._supermessageid = supermessageid;
+    this._text = text;
+    this._datetime = datetime;
+    this._isChannelMessage = isChannelMessage;
+  }
 
-    private _superMessageId: number;
 
-    private _text: string;
+  get id(): number {
+    return this._id;
+  }
 
-    private _datetime: string;
+  get senderid(): number {
+    return this._senderid;
+  }
 
-    private _isChannelMessage: number;
+  get receiverid(): number {
+    return this._receiverid;
+  }
 
-    constructor(id: number, senderId: number, recieverId: number, superMessageId: number, text: string, datetime: string, isChannelMessage: number) {
-        this._id = id;
-        this._senderId = senderId;
-        this._recieverId = recieverId;
-        this._superMessageId = superMessageId;
-        this._text = text;
-        this._datetime = datetime;
-        this._isChannelMessage = isChannelMessage;
-    }
+  get supermessageid(): number {
+    return this._supermessageid;
+  }
 
-    get id(): number {
-        return this._id;
-    }
+  get text(): string {
+    return this._text;
+  }
 
-    set id(value: number) {
-        this._id = value;
-    }
+  get datetime(): string {
+    return this._datetime;
+  }
 
-    get senderId(): number {
-        return this._senderId;
-    }
+  get isChannelMessage(): number {
+    return this._isChannelMessage;
+  }
 
-    set senderId(value: number) {
-        this._senderId = value;
-    }
+  set id(value: number) {
+    this._id = value;
+  }
 
-    get recieverId(): number {
-        return this._recieverId;
-    }
+  set senderid(value: number) {
+    this._senderid = value;
+  }
 
-    set recieverId(value: number) {
-        this._recieverId = value;
-    }
+  set receiverid(value: number) {
+    this._receiverid = value;
+  }
 
-    get superMessageId(): number {
-        return this._superMessageId;
-    }
+  set supermessageid(value: number) {
+    this._supermessageid = value;
+  }
 
-    set superMessageId(value: number) {
-        this._superMessageId = value;
-    }
+  set text(value: string) {
+    this._text = value;
+  }
 
-    get text(): string {
-        return this._text;
-    }
+  set datetime(value: string) {
+    this._datetime = value;
+  }
 
-    set text(value: string) {
-        this._text = value;
-    }
-
-    get datetime(): string {
-        return this._datetime;
-    }
-
-    set datetime(value: string) {
-        this._datetime = value;
-    }
-
-    get isChannelMessage(): number {
-        return this._isChannelMessage;
-    }
-
-    set isChannelMessage(value: number) {
-        this._isChannelMessage = value;
-    }
+  set isChannelMessage(value: number) {
+    this._isChannelMessage = value;
+  }
 }
 
 export default MessageOrm;

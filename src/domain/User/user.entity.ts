@@ -1,19 +1,29 @@
-class UserOrm {
+import MessageEntity from "../Message/message.entity";
+
+class UserEntity {
     private _id: number;
     private _name: string;
     private _login: string;
     private _password: string;
     private _token: string | null;
+    private _messages: MessageEntity[] = [];
 
-
-    constructor(id: number, name: string, login: string, password: string, token: string | null) {
+    constructor(id: number, name: string, login: string, password: string, token: string | null, messages?: MessageEntity[]) {
         this._id = id;
         this._name = name;
         this._login = login;
         this._password = password;
         this._token = token;
+        this._messages = messages || [];
     }
 
+    get messages(): MessageEntity[] {
+        return this._messages;
+    }
+
+    set messages(value: MessageEntity[]) {
+        this._messages = value;
+    }
 
     get id(): number {
         return this._id;
@@ -56,5 +66,4 @@ class UserOrm {
     }
 }
 
-export default UserOrm;
-
+export default UserEntity;
