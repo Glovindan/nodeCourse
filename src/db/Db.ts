@@ -8,9 +8,21 @@ import UserOrm from "./orm-entities/UserOrm";
 
 class DB implements IDataBase {
   private db: Database;
-
   constructor() {
     this.db = new sqlite3.Database(`${__dirname}/${settings.dbName}`);
+  }
+
+  getUserByToken(token: string): Promise<UserOrm | null> {
+    return new Promise<UserOrm|null>((resolve, reject) => {
+      const query = `SELECT * FROM users WHERE token=${token}`;
+      this.db.get(query, (err, res) => {
+        if (err) reject(err);
+
+        if (!res) resolve(null);
+
+        resolve(new UserOrm(res.id, res.name, res.login, res.password, res.token));
+      })
+    });
   }
 
   getUserByLogin(login: string) {
