@@ -44,12 +44,24 @@ class DB implements IDataBase {
         if (!err) {
           let messages: MessageOrm[] = [];
           for(let message of res) {
-            messages.push(message);
+            messages.push(new MessageOrm(message.id, message.senderid, message.receiverid, message.supermessageid, message.text, message.datetime, message.isChannelMessage));
           }
           resolve(messages);
         }
       });
     });
+  }
+
+  getMessage(messageId:number) {
+   return new Promise<MessageOrm | null>(resolve => {
+     const query = `SELECT * FROM messages WHERE messageId = ${messageId}`;
+     this.db.get(query, (err, res) => {
+       if (!err) {
+         let message = new MessageOrm(res.id, res.senderid, res.receiverid,res.supermessageid, res.text, res.datetime, res.isChannelMessage);
+         resolve(message);
+       }
+     })
+   })
   }
 
   addUser(name: string, login: string, password: string) {
