@@ -41,12 +41,29 @@ class UserService implements IUserService {
         return userEntity;
     }
 
-    login(login: string, password: string): Promise<boolean> {
-        return this._db.g;
+    async login(login: string, password: string): Promise<boolean> {
+        const userOrm = await this._db.getUserByLogin(login);
+
+        if (!userOrm) return false;
+
+        if (password !== userOrm.password) return false;
+
+        return true;
     }
 
-    registration(login: string, password: string, nickname: string): Promise<boolean> {
-        return undefined;
+
+
+
+    async registration(login: string, password: string, name: string): Promise<boolean> {
+        const userOrm = await this._db.getUserByLogin(login);
+
+        if (userOrm) return false;
+
+        const newUser = await this._db.addUser(name, login, password);
+
+        if(newUser) return true;
+
+        return false;
     }
 
 }
