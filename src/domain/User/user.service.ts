@@ -70,14 +70,14 @@ class UserService implements IUserService {
         return Boolean(newUser);
     }
 
-    async  logout(token: string): Promise<boolean> {
+    async logout(token: string): Promise<boolean> {
         const userOrm = await this._db.getUserByToken(token);
 
         if (!userOrm) return false;
 
-        userOrm.token = null;
+        const answer = await this._db.setToken(userOrm.id, null);
 
-        return true;
+        return Boolean(answer);
     }
 }
 
