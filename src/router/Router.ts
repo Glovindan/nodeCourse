@@ -31,10 +31,47 @@ class Router {
             });
         });
 
+        this._router.get('/getUserData/:token', async(req, res) => {
+            const { token } = req.params;
+            const result = await  this._userService.getUserData(token);
+
+            return res.send({
+                status: Boolean(result),
+                result,
+            })
+        });
+
+        this._router.post('/logout', async(req, res) => {
+            const { token } = req.body;
+            const result = await  this._userService.logout(token);
+
+            return res.send({
+                status: Boolean(result),
+                result,
+            });
+        });
+
+        this._router.post('/registration', async(req, res) => {
+            const { login, password, name } = req.body;
+            const result = await  this._userService.registration(login, password, name);
+
+            return res.send({
+                status: Boolean(result),
+                result,
+            })
+        });
+
+        //CreateChannel
+
+
+        //Send message
+
+        //Get messages
+
         /* TODO::
-            logout,
-            registration,
-            get user data,
+            logout,++
+            registration,++
+            get user data,++
             create channel,
             send message (another user/channel),
             get messages in channel/dialog

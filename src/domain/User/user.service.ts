@@ -2,11 +2,13 @@
  * Описание всех действий пользователя
  * register
  * login
+ * logout
  * authorize
  */
 import IUserService from "./IUser.service";
 import IDataBase from "../../db/IDataBase";
 import UserEntity from "./user.entity";
+const bcrypt = require('bcryptjs');
 
 class UserService implements IUserService {
     constructor(private readonly _db: IDataBase) {}
@@ -30,12 +32,25 @@ class UserService implements IUserService {
         );
     }
 
+    async getUserData(token: string): Promise<Object> {
+        const userOrm = await this._db.getUserByToken(token);
+
+        if (!userOrm) return null;
+
+        return {
+            id: userOrm.id,
+            name: userOrm.name,
+            login: userOrm.login
+        }
+    }
+
     async login(login: string, password: string): Promise<string | null> {
         const userOrm = await this._db.getUserByLogin(login);
 
         if (!userOrm) return null;
 
-        if (password === userOrm.password) {
+        const isMatch = await bcrypt.compare(password, userOrm.password);
+        if (isMatch) {
             const token = `${login}${Math.ceil(Date.now() / (Math.random() * 10000))}`;
             await this._db.setToken(userOrm.id, token);
 
@@ -49,10 +64,20 @@ class UserService implements IUserService {
         const userOrm = await this._db.getUserByLogin(login);
 
         if (userOrm) return false;
-
-        const newUser = await this._db.addUser(name, login, password);
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = await this._db.addUser(name, login, hashedPassword);
 
         return Boolean(newUser);
+    }
+
+    async  logout(token: string): Promise<boolean> {
+        const userOrm = await this._db.getUserByToken(token);
+
+        if (!userOrm) return false;
+
+        userOrm.token = null;
+
+        return true;
     }
 }
 
