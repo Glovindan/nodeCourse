@@ -7,7 +7,6 @@
 import IUserService from "./IUser.service";
 import IDataBase from "../../db/IDataBase";
 import UserEntity from "./user.entity";
-import MessageEntity from "../Message/message.entity";
 
 class UserService implements IUserService {
     constructor(private readonly _db: IDataBase) {}
@@ -22,33 +21,39 @@ class UserService implements IUserService {
 
         if (!userOrm) return null;
 
-        const messagesOrm = await this._db.getUserMessages(userOrm.id);
+        return new UserEntity(
+            userOrm.id,
+            userOrm.name,
+            userOrm.login,
+            userOrm.password,
+            userOrm.token
+        );
+    }
 
-        const messages: MessageEntity[] = [];
-        for (let message of messagesOrm) {
-            const messageEntity = new MessageEntity(message.id, message.text, message.datetime, message.isChannelMessage, null);
+    async login(login: string, password: string): Promise<string | null> {
+        const userOrm = await this._db.getUserByLogin(login);
 
-            if (message.supermessageid) {
-                const superMessage = await this._db.getMessage(message.supermessageid);
-                messageEntity.superMessage = new MessageEntity(superMessage.id, superMessage.text, superMessage.datetime, superMessage.isChannelMessage, null);
-            }
+        if (!userOrm) return null;
 
-            messages.push(messageEntity);
+        if (password === userOrm.password) {
+            const token = `${login}${Math.ceil(Date.now() / (Math.random() * 10000))}`;
+            await this._db.setToken(userOrm.id, token);
+
+            return token;
         }
 
-        const userEntity = new UserEntity(userOrm.id, userOrm.name, userOrm.login, userOrm.password, userOrm.token, messages);
-
-        return userEntity;
+        return null;
     }
 
-    login(login: string, password: string): Promise<boolean> {
-        return this._db.g;
-    }
+    async registration(login: string, password: string, name: string): Promise<boolean> {
+        const userOrm = await this._db.getUserByLogin(login);
 
-    registration(login: string, password: string, nickname: string): Promise<boolean> {
-        return undefined;
-    }
+        if (userOrm) return false;
 
+        const newUser = await this._db.addUser(name, login, password);
+
+        return Boolean(newUser);
+    }
 }
 
 export default UserService;
