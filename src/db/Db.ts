@@ -14,7 +14,7 @@ class DB implements IDataBase {
 
   getUserByToken(token: string): Promise<UserOrm | null> {
     return new Promise<UserOrm|null>((resolve, reject) => {
-      const query = `SELECT * FROM users WHERE token=${token}`;
+      const query = `SELECT * FROM users WHERE token='${token}'`;
       this.db.get(query, (err, res) => {
         if (err) reject(err);
 
@@ -25,9 +25,17 @@ class DB implements IDataBase {
     });
   }
 
+  setToken(id: number, token?: string): Promise<boolean> {
+    return new Promise(resolve => {
+      const query = `UPDATE users SET token='${token || null}' WHERE id=${id}`;
+
+      this.db.run(query, err => resolve(Boolean(err)));
+    })
+  }
+
   getUserByLogin(login: string) {
     return new Promise<UserOrm | null>(resolve => {
-      const query = `SELECT * FROM users WHERE login = ${login}`;
+      const query = `SELECT * FROM users WHERE login='${login}'`;
       this.db.get(query, (err, res) => {
         if (!err) {
           const user = new UserOrm(res.id, res.name, res.login, res.password, res.token);
@@ -37,27 +45,40 @@ class DB implements IDataBase {
     });
   }
 
-  getUserMessages(userId: number) {
+  getUserMessagesInChat(ownerId: number, receiverId: number) {
     return new Promise<MessageOrm[] | null>(resolve => {
-      const query = `SELECT * FROM messages WHERE receiverId = ${userId}`;
-      this.db.get(query, (err, res) => {
-        if (!err) {
-          let messages: MessageOrm[] = [];
-          for(let message of res) {
-            messages.push(new MessageOrm(message.id, message.senderid, message.receiverid, message.supermessageid, message.text, message.datetime, message.isChannelMessage));
-          }
-          resolve(messages);
-        }
-      });
+      const query = `SELECT * FROM messages WHERE senderId=${ownerId} AND receiverId=${receiverId}`;
+
+      this.db.all(query, (err, rows) => {
+        if (err) resolve(null);
+
+        let messages: MessageOrm[] = [];
+
+        rows.reduce((acc, row) =>
+          acc.push(
+              new MessageOrm(
+                  row.id,
+                  row.senderId,
+                  row.receiverId,
+                  row.superMessageId,
+                  row.text,
+                  row.datetime,
+                  row.isChannelMessage
+              )
+          ), messages);
+
+        resolve(messages);
+      })
     });
   }
 
   getMessage(messageId:number) {
    return new Promise<MessageOrm | null>(resolve => {
-     const query = `SELECT * FROM messages WHERE messageId = ${messageId}`;
+     const query = `SELECT * FROM messages WHERE messageId=${messageId}`;
      this.db.get(query, (err, res) => {
        if (!err) {
-         let message = new MessageOrm(res.id, res.senderid, res.receiverid,res.supermessageid, res.text, res.datetime, res.isChannelMessage);
+         let message = new MessageOrm(res.id, res.senderId, res.receiverId,res.superMessageId, res.text, res.datetime, res.isChannelMessage);
+
          resolve(message);
        }
      })
@@ -68,40 +89,28 @@ class DB implements IDataBase {
     return new Promise<boolean>(async (resolve) => {
       const existedUser = await this.getUserByLogin(login);
       if (!existedUser) {
-        const query = `INSERT INTO users(name, login, password) VALUES(${name},${login},${password})`;
-        this.db.get(query, (err) => {
-          if (!err) {
-            resolve(true);
-          }
-          resolve(false);
-        });
+        const query = `INSERT INTO users(name, login, password) VALUES('${name}','${login}','${password}')`;
+
+        this.db.run(query, (err) => resolve(Boolean(err)));
       }
       resolve(false);
     });
   }
 
-  sendMessage(isChannelMessage: boolean, senderId: number, receiverId: number, text: string, datetime: string) {
+  sendMessage(isChannelMessage: boolean, senderId: number, receiverId: number, text: string) {
     return new Promise<boolean>(resolve => {
       const query = `INSERT INTO messages(isChannelMessage, senderId, receiverId, text, datetime) 
-                     VALUES(${isChannelMessage}, ${senderId}, ${receiverId}, ${text}, ${datetime})`;
-      this.db.get(query, (err) => {
-        if (!err) {
-          resolve(true);
-        }
-        resolve(false);
-      });
+                     VALUES('${Number(isChannelMessage)}', ${senderId}, ${receiverId}, '${text}', '${Date.now()}')`;
+
+      this.db.run(query, (err) => resolve(Boolean(err)));
     });
   }
 
   createChannel(name: string) {
     return new Promise<boolean>(resolve => {
-      const query = `INSERT INTO channels(name) VALUES(${name})`;
-      this.db.get(query, (err) => {
-        if (!err) {
-          resolve(true);
-        }
-        resolve(false);
-      });
+      const query = `INSERT INTO channels(name) VALUES('${name}')`;
+
+      this.db.run(query, (err) => resolve(Boolean(err)));
     });
   };
 

@@ -7,7 +7,6 @@
 import IUserService from "./IUser.service";
 import IDataBase from "../../db/IDataBase";
 import UserEntity from "./user.entity";
-import MessageEntity from "../Message/message.entity";
 
 class UserService implements IUserService {
     constructor(private readonly _db: IDataBase) {}
@@ -22,37 +21,29 @@ class UserService implements IUserService {
 
         if (!userOrm) return null;
 
-        const messagesOrm = await this._db.getUserMessages(userOrm.id);
-
-        const messages: MessageEntity[] = [];
-        for (let message of messagesOrm) {
-            const messageEntity = new MessageEntity(message.id, message.text, message.datetime, message.isChannelMessage, null);
-
-            if (message.supermessageid) {
-                const superMessage = await this._db.getMessage(message.supermessageid);
-                messageEntity.superMessage = new MessageEntity(superMessage.id, superMessage.text, superMessage.datetime, superMessage.isChannelMessage, null);
-            }
-
-            messages.push(messageEntity);
-        }
-
-        const userEntity = new UserEntity(userOrm.id, userOrm.name, userOrm.login, userOrm.password, userOrm.token, messages);
-
-        return userEntity;
+        return new UserEntity(
+            userOrm.id,
+            userOrm.name,
+            userOrm.login,
+            userOrm.password,
+            userOrm.token
+        );
     }
 
-    async login(login: string, password: string): Promise<boolean> {
+    async login(login: string, password: string): Promise<string | null> {
         const userOrm = await this._db.getUserByLogin(login);
 
-        if (!userOrm) return false;
+        if (!userOrm) return null;
 
-        if (password !== userOrm.password) return false;
+        if (password === userOrm.password) {
+            const token = `${login}${Math.ceil(Date.now() / (Math.random() * 10000))}`;
+            await this._db.setToken(userOrm.id, token);
 
-        return true;
+            return token;
+        }
+
+        return null;
     }
-
-
-
 
     async registration(login: string, password: string, name: string): Promise<boolean> {
         const userOrm = await this._db.getUserByLogin(login);
@@ -61,11 +52,8 @@ class UserService implements IUserService {
 
         const newUser = await this._db.addUser(name, login, password);
 
-        if(newUser) return true;
-
-        return false;
+        return Boolean(newUser);
     }
-
 }
 
 export default UserService;

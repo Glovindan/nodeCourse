@@ -1,0 +1,13 @@
+1) logout
+2) registration
+3) createChannel
+4) getUserByToken БЕЗ ПАРОЛЯ!!!!
+
+5) md5 вместо убогой хуйни
+
+6) send message (another user/channel)
+7) get message in channel/dialog
+
+в роутах
+
+++

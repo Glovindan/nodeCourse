@@ -1,14 +1,15 @@
 import * as Express from 'express';
 import DB from "./db/DB";
 import Router from "./router/Router";
-//TODO: 1)  methods for db to register, authorize, send message to user, create channel, get list of messages in chat, get list of messages in channel
+import UserService from "./domain/User/user.service";
+
 const app = Express();
 
 const db = new DB();
 
-db.getUserByLogin('admin').then(user => console.log(user));
+const userService = new UserService(db);
 
-const router = new Router().router;
+const router = new Router(userService).router;
 
 app.use(router);
 
